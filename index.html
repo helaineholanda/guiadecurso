@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guia de Estudos · Curso Exemplo (demo)</title>
+<!--
+  ╔════════════════════════════════════════════════════════════════════╗
+  ║  GUIA DE ESTUDOS INTERATIVO · VERSÃO DE DEMONSTRAÇÃO                ║
+  ║  Conteúdo 100% fictício (curso de inglês inventado).                ║
+  ╚════════════════════════════════════════════════════════════════════╝
+
+  COMO LER ESTE ARQUIVO (3 partes, nesta ordem):
+   1) <style>   -> a APARÊNCIA: cores, tamanhos, espaços.
+   2) <body>    -> a ESTRUTURA: cabeçalho, as 4 abas e o menu de baixo.
+   3) <script>  -> o COMPORTAMENTO e os TEXTOS (rotinas, semana, dicas).
+
+  PARA EDITAR SEM QUEBRAR:
+   - Troque só o texto que está ENTRE ASPAS ("...").
+   - Não apague aspas, vírgulas, colchetes [ ] nem chaves { }.
+   - Salve como index.html e abra no navegador para conferir.
+-->
+<style>
+  /* ---------- CORES (troque aqui para mudar o visual todo) ---------- */
+  :root {
+    --bg: #f6f4ee; --surface: #ffffff; --ink: #1c2430; --muted: #5d6877; --line: #d9dde3;
+    --brand: #2b5c8a; --brand-ink: #ffffff; --accent: #e8a317; --ok: #1f8f55; --alert: #c63d3d;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14181f; --surface: #1d232c; --ink: #eef1f5; --muted: #a2adbb; --line: #333c49;
+            --brand: #6aa6dd; --brand-ink: #0f1620; --accent: #f1b73a; --ok: #3dbd7d; --alert: #ef6a6a;
+            color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         padding: 0 max(16px, env(safe-area-inset-right)) 96px max(16px, env(safe-area-inset-left)); }
+  .shell { max-width: 520px; margin: 0 auto; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; border-radius: 6px; }
+  h1, h2, h3, p { margin: 0; }
+
+  header { padding: 22px 0 10px; }
+  .demo { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+          background: var(--accent); color: #1c2430; padding: 3px 8px; border-radius: 4px; }
+  h1 { font-size: 26px; line-height: 1.15; margin-top: 8px; }
+  .lead { color: var(--muted); margin-top: 4px; }
+
+  .tab[hidden] { display: none; }
+  .tab { padding-top: 10px; }
+  h2 { font-size: 20px; margin: 6px 0 10px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .stack { display: flex; flex-direction: column; gap: 10px; }
+
+  /* escolha do tempo do dia */
+  .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0 12px; }
+  .mode { text-align: left; background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; padding: 12px; }
+  .mode b { display: block; font-size: 20px; }
+  .mode span { font-size: 12px; color: var(--muted); }
+  .mode[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+  .mode[aria-pressed="true"] span { color: var(--brand-ink); opacity: .85; }
+  .priority { background: var(--alert); color: #fff; border-radius: 10px; padding: 10px 12px; font-size: 13.5px; }
+
+  /* progresso e checklist */
+  .progress { display: flex; align-items: center; gap: 10px; margin: 16px 0 10px; font-size: 13px; font-weight: 600; }
+  .bar { flex: 1; height: 10px; border-radius: 6px; background: var(--line); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--ok); transition: width .25s ease; }
+  .link { background: none; border: 0; color: var(--brand); text-decoration: underline; font-size: 12.5px; font-weight: 600; }
+  .steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .step label { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; cursor: pointer; }
+  .step input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .num { width: 34px; height: 34px; border-radius: 50%; background: var(--brand); color: var(--brand-ink);
+         display: grid; place-items: center; font-weight: 700; }
+  .step input:checked + .num { background: var(--ok); color: #fff; }
+  .step input:checked + .num::after { content: "✓"; }
+  .step input:checked + .num span { display: none; }
+  .step input:focus-visible + .num { outline: 3px solid var(--brand); outline-offset: 2px; }
+  .step b { display: block; }
+  .step small { color: var(--muted); font-size: 13.5px; }
+  .step.done b { text-decoration: line-through; opacity: .6; }
+  .done-msg { margin-top: 12px; font-weight: 600; color: var(--ok); }
+
+  /* onde fica cada coisa */
+  .path { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
+  .chip { background: var(--brand); color: var(--brand-ink); font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+  .arr { color: var(--muted); font-weight: 700; }
+
+  /* semana */
+  .day { display: grid; grid-template-columns: 64px 1fr; padding: 0; overflow: hidden; }
+  .day .d { background: var(--brand); color: var(--brand-ink); font-weight: 700; display: grid; place-items: center; padding: 12px 0; }
+  .day .a { padding: 12px; font-weight: 600; }
+  .day.today { outline: 3px solid var(--accent); }
+
+  /* dicas */
+  details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+  summary { cursor: pointer; padding: 12px 14px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: "–"; }
+  details p { padding: 0 14px 14px; color: var(--muted); }
+  .remember { margin-top: 16px; background: var(--brand); color: var(--brand-ink); border-radius: 12px; padding: 14px; }
+  .foot { margin-top: 18px; font-size: 12px; color: var(--muted); text-align: center; }
+
+  /* menu de baixo */
+  nav { position: fixed; left: 0; right: 0; bottom: 0; background: var(--surface); border-top: 1px solid var(--line);
+        padding: 6px 10px calc(6px + env(safe-area-inset-bottom)); }
+  .nav-in { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .nb { background: none; border: 0; padding: 8px 2px; border-radius: 10px; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .nb[aria-current="page"] { background: var(--brand); color: var(--brand-ink); }
+  @media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- CABEÇALHO -->
+  <header>
+    <span class="demo">Demonstração · conteúdo fictício</span>
+    <h1>Guia de Estudos</h1>
+    <p class="lead">Curso Exemplo de Inglês · 24 semanas</p>
+  </header>
+
+  <!-- ABA 1 · HOJE: escolha do tempo, aviso de prioridade, progresso e checklist -->
+  <main id="tab-hoje" class="tab">
+    <h2>Quanto tempo você tem hoje?</h2>
+    <div class="modes">
+      <button class="mode" data-mode="corrido" aria-pressed="true"><b>20 a 60 min</b><span>Dia corrido · rotina essencial</span></button>
+      <button class="mode" data-mode="livre" aria-pressed="false"><b>2 a 4 h</b><span>Mais tempo · rotina completa</span></button>
+    </div>
+    <p class="priority" id="priority"></p>
+    <div class="progress"><span id="count">0 de 0</span><div class="bar"><i id="bar"></i></div><button class="link" id="reset">Zerar o dia</button></div>
+    <ol class="steps" id="steps"></ol>
+    <p class="done-msg" id="doneMsg" hidden>Dia fechado. Bom descanso e até amanhã.</p>
+  </main>
+
+  <!-- ABA 2 · ONDE FICA: caminho de cada recurso na plataforma fictícia -->
+  <section id="tab-onde" class="tab" hidden>
+    <h2>Onde fica cada coisa</h2>
+    <div class="stack" id="where"></div>
+  </section>
+
+  <!-- ABA 3 · SEMANA: sugestão de organização -->
+  <section id="tab-semana" class="tab" hidden>
+    <h2>Sua semana</h2>
+    <p class="lead" style="margin-bottom:10px">Uma sugestão: um tema grande por dia. Ajuste à sua rotina.</p>
+    <div class="stack" id="week"></div>
+    <div class="card" style="margin-top:12px"><b>Toda semana</b><p class="lead">Faça 1 simulado completo. Ele mostra como o que você estudou aparece na prova.</p></div>
+  </section>
+
+  <!-- ABA 4 · DICAS: regras e dúvidas frequentes -->
+  <section id="tab-dicas" class="tab" hidden>
+    <h2>Dicas e dúvidas</h2>
+    <div class="stack" id="faq"></div>
+    <div class="remember"><b>Lembre-se</b><p>O objetivo não é fazer tudo todos os dias, e sim aproveitar o tempo que você tem com um caminho definido. Se o dia apertou, siga a rotina essencial e retome amanhã.</p></div>
+    <p class="foot">Protótipo de demonstração com conteúdo fictício, feito com apoio de IA.</p>
+  </section>
+</div>
+
+<nav><div class="nav-in" id="nav"></div></nav>
+
+<script>
+/* ============================================================
+   PARTE 3 · TEXTOS (edite aqui) E COMPORTAMENTO
+   ============================================================ */
+
+/* ----- ROTINAS: cada passo tem título (t) e explicação (d) ----- */
+var ROUTINES = {
+  corrido: {
+    aviso: "A Revisão Rápida é a prioridade de todo dia. Mesmo no dia mais apertado, ela não fica de fora.",
+    passos: [
+      { t: "Abra a Trilha do Dia", d: "Diga quanto tempo você tem e ela organiza o seu estudo." },
+      { t: "Faça a Revisão Rápida", d: "10 a 15 minutos. Em dia corrido, use o modo Express." },
+      { t: "Resolva 10 exercícios", d: "Escolha o tema do dia no Banco de Exercícios." }
+    ]
+  },
+  livre: {
+    aviso: "Com mais tempo, a Revisão Rápida continua vindo primeiro. Depois, aprofunde.",
+    passos: [
+      { t: "Abra a Trilha do Dia", d: "Ela define o seu dia de acordo com o tempo disponível." },
+      { t: "Faça a Revisão Rápida", d: "No modo Normal, sem pressa." },
+      { t: "Assista à aula do tema", d: "Comece pela versão curta. Só vá para a aula longa se sentir dificuldade." },
+      { t: "Leia a ficha resumo", d: "Toda aula tem uma ficha com os pontos principais." },
+      { t: "Resolva 20 a 40 exercícios", d: "Priorize a correção: qualidade vale mais do que quantidade." }
+    ]
+  }
+};
+
+/* ----- ONDE FICA: título, explicação e caminho (chips) ----- */
+var WHERE = [
+  { t: "Configurar o seu plano", d: "Escolha a prova que você quer fazer. Isso deixa o estudo com a cara do seu objetivo.", p: ["Seu perfil", "Meu plano", "Configurar"] },
+  { t: "Abrir a Trilha do Dia e o Assistente", d: "Clique no ícone do robô, no canto inferior direito. O menu abre com os dois.", p: ["Ícone do robô", "Trilha do Dia / Assistente"] },
+  { t: "Revisão Rápida", d: "É a prioridade de todo dia. Faça antes do resto do estudo.", p: ["Aba Exercícios", "Menu lateral", "Revisão Rápida"] }
+];
+
+/* ----- SEMANA: dia e atividade ----- */
+var WEEK = [
+  ["Seg", "Gramática"], ["Ter", "Vocabulário"], ["Qua", "Compreensão de texto"],
+  ["Qui", "Audição"], ["Sex", "Conversação"], ["Sáb", "Simulado + revisão"], ["Dom", "Descanso ou revisão leve"]
+];
+
+/* ----- DÚVIDAS FREQUENTES: pergunta (q) e resposta (a) ----- */
+var FAQ = [
+  { q: "Preciso estudar todos os dias?", a: "O ideal é manter o ritmo. Mas o cronograma é um norte, não uma obrigação: se o dia apertou, siga a rotina essencial e retome no dia seguinte." },
+  { q: "Qual a meta de exercícios?", a: "Comece com 10 a 20 por dia e vá aumentando aos poucos, até 40 a 60, sempre com boa correção." },
+  { q: "Prefiro fazer o simulado no papel. Pode?", a: "Pode. Imprima, faça à mão e depois responda na plataforma, para tudo entrar nas suas estatísticas." },
+  { q: "Aula curta ou aula longa?", a: "Comece pela curta. A aula longa é para quando você sentir dificuldade no tema." }
+];
+
+/* ============================================================
+   A PARTIR DAQUI É O FUNCIONAMENTO (não precisa mexer)
+   ============================================================ */
+var TABS = [["hoje", "Hoje"], ["onde", "Onde fica"], ["semana", "Semana"], ["dicas", "Dicas"]];
+var mode = "corrido", checked = {};
+
+function load() { try { return JSON.parse(localStorage.getItem("guia-demo") || "{}"); } catch (e) { return {}; } }
+function save() { try { localStorage.setItem("guia-demo", JSON.stringify(checked)); } catch (e) {} }
+checked = load();
+
+function el(tag, cls, html) { var n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; }
+
+function renderSteps() {
+  var r = ROUTINES[mode], ol = document.getElementById("steps");
+  ol.innerHTML = "";
+  document.getElementById("priority").textContent = r.aviso;
+  r.passos.forEach(function (p, i) {
+    var key = mode + ":" + i, li = el("li", "step card");
+    var id = "s-" + key.replace(":", "-");
+    li.innerHTML = '<label for="' + id + '"><input type="checkbox" id="' + id + '"><span class="num"><span>' + (i + 1) + '</span></span><span><b>' + p.t + '</b><small>' + p.d + '</small></span></label>';
+    var cb = li.querySelector("input");
+    cb.checked = !!checked[key]; li.classList.toggle("done", cb.checked);
+    cb.addEventListener("change", function () { checked[key] = cb.checked; li.classList.toggle("done", cb.checked); save(); progress(); });
+    ol.appendChild(li);
+  });
+  progress();
+}
+function progress() {
+  var total = ROUTINES[mode].passos.length, done = 0;
+  ROUTINES[mode].passos.forEach(function (_, i) { if (checked[mode + ":" + i]) done++; });
+  document.getElementById("count").textContent = done + " de " + total;
+  document.getElementById("bar").style.width = (total ? done / total * 100 : 0) + "%";
+  document.getElementById("doneMsg").hidden = !(total && done === total);
+}
+document.querySelectorAll(".mode").forEach(function (b) {
+  b.addEventListener("click", function () {
+    mode = b.dataset.mode;
+    document.querySelectorAll(".mode").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    renderSteps();
+  });
+});
+document.getElementById("reset").addEventListener("click", function () { checked = {}; save(); renderSteps(); });
+
+WHERE.forEach(function (w, i) {
+  var c = el("div", "card", "<b>" + (i + 1) + ". " + w.t + "</b><p class='lead'>" + w.d + "</p>");
+  var path = el("div", "path");
+  w.p.forEach(function (s, j) { if (j) path.appendChild(el("span", "arr", "›")); path.appendChild(el("span", "chip", s)); });
+  c.appendChild(path); document.getElementById("where").appendChild(c);
+});
+var todayIdx = (new Date().getDay() + 6) % 7;
+WEEK.forEach(function (d, i) {
+  var c = el("div", "card day" + (i === todayIdx ? " today" : ""), "<div class='d'>" + d[0] + "</div><div class='a'>" + d[1] + "</div>");
+  document.getElementById("week").appendChild(c);
+});
+FAQ.forEach(function (f) {
+  document.getElementById("faq").appendChild(el("details", "", "<summary>" + f.q + "</summary><p>" + f.a + "</p>"));
+});
+
+var nav = document.getElementById("nav");
+TABS.forEach(function (t, i) {
+  var b = el("button", "nb", t[1]); b.type = "button";
+  if (i === 0) b.setAttribute("aria-current", "page");
+  b.addEventListener("click", function () {
+    TABS.forEach(function (x) { document.getElementById("tab-" + x[0]).hidden = x[0] !== t[0]; });
+    nav.querySelectorAll(".nb").forEach(function (n) { n.removeAttribute("aria-current"); });
+    b.setAttribute("aria-current", "page"); window.scrollTo(0, 0);
+  });
+  nav.appendChild(b);
+});
+renderSteps();
+</script>
+</body>
+</html>
